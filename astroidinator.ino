@@ -35,6 +35,9 @@ void setup() {
     initSerial();
     showCreator();
 
+    writeToLcd(0, 0, "Hello");
+    writeToLcd(0, 1, "World");
+
 }
 
 void writeToLcd(int a_x, int a_y, String a_text, bool a_clear) {
