@@ -50,13 +50,19 @@ void setup() {
 }
 
 void writeToLcd(int a_x, int a_y, String a_text, bool a_clear) {
+    int m_length = a_text.length();
 
     if (a_clear) {
         astroidinatorLcd.clear();
     }
 
     astroidinatorLcd.setCursor(a_x, a_y);
-    astroidinatorLcd.print(a_text);
+
+    for (int m_index = 0; m_index < m_length; m_index++) {
+        astroidinatorLcd.print(a_text[m_index]);
+    }
+
+    printLn(a_text);
 }
 
 void writeToLcd(int a_x, int a_y, String a_text) {
