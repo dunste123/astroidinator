@@ -7,11 +7,12 @@
  */
 
 #include <Arduino.h>
+#include <LiquidCrystal_I2C.h>
 
 #define SERIAL_RATE 115200
 #define ENABLE_DEBUG true
 
-LiquidCrystal_I2C astroidinatorLcd(0x27, 20, 4)
+LiquidCrystal_I2C astroidinatorLcd(0x27, 20, 4);
 
 // Globals
 
@@ -35,24 +36,27 @@ void setup() {
     initSerial();
     showCreator();
 
+    astroidinatorLcd.setBacklight(0);
+
+    delay(1000);
+
+    astroidinatorLcd.setBacklight(1);
+
+    delay(1000);
+
     writeToLcd(0, 0, "Hello");
     writeToLcd(0, 1, "World");
 
 }
 
 void writeToLcd(int a_x, int a_y, String a_text, bool a_clear) {
-    int m_length = a_text.length();
-    String m_singleLetter;
 
     if (a_clear) {
         astroidinatorLcd.clear();
     }
 
     astroidinatorLcd.setCursor(a_x, a_y);
-
-    for (int m_index = 0; m_index < m_length; m_index++) {
-        astroidinatorLcd.print(a_text[m_index]);
-    }
+    astroidinatorLcd.print(a_text);
 }
 
 void writeToLcd(int a_x, int a_y, String a_text) {
