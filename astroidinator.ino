@@ -12,7 +12,7 @@
 #define SERIAL_RATE 115200
 #define ENABLE_DEBUG true
 
-LiquidCrystal_I2C astroidinatorLcd(0x27, 20, 4);
+LiquidCrystal_I2C astroidinatorLcd(0x3F, 20, 4); // 0x27 or 0x3F
 
 // Globals
 
@@ -35,6 +35,8 @@ void setup() {
 
     initSerial();
     showCreator();
+
+    astroidinatorLcd.init();
 
     astroidinatorLcd.setBacklight(0);
 
