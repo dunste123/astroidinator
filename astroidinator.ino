@@ -8,69 +8,157 @@
 
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
+#include <SimpleTimer.h>
 
 #define SERIAL_RATE 115200
 #define ENABLE_DEBUG true
 
+#define JOY_MOVE A0
+#define JOY_KEY 8
+
 LiquidCrystal_I2C astroidinatorLcd(0x3F, 20, 4); // 0x27 or 0x3F
+SimpleTimer timer;
 
 // Globals
 
-void printLn(String a_inputString) {
+typedef struct {
+    int xPos = 0;
+    int yPos = 1;
+    String type = "}";
+} Player;
+
+typedef struct {
+    int xPos = random(20, 80);
+    int yPos = random(0, 3);
+    String type;
+} UFO;
+
+UFO asteroids[10];
+UFO spaceShips[10];
+Player player;
+
+void printLn(const String& a_inputString) {
 #if ENABLE_DEBUG
     Serial.println(a_inputString);
 #endif
 }
 
-void initSerial() {
-    Serial.begin(SERIAL_RATE);
-    printLn("READY: Serial initialized");
-}
-
-void showCreator() {
-    printLn("Created by: Duncan \"duncte123\" Sterken");
-}
-
-void setup() {
-
-    initSerial();
-    showCreator();
-
-    astroidinatorLcd.init();
-
-    astroidinatorLcd.setBacklight(0);
-
-    delay(1000);
-
-    astroidinatorLcd.setBacklight(1);
-
-    delay(1000);
-
-    writeToLcd(0, 0, "Hello");
-    writeToLcd(0, 1, "World");
-
-}
-
 void writeToLcd(int a_x, int a_y, String a_text, bool a_clear) {
-    int m_length = a_text.length();
-
     if (a_clear) {
         astroidinatorLcd.clear();
     }
 
+    if (a_x > 20 || a_y > 4 || a_x < 0 || a_y < 0) {
+        return;
+    }
+
     astroidinatorLcd.setCursor(a_x, a_y);
+
+    int m_length = a_text.length();
 
     for (int m_index = 0; m_index < m_length; m_index++) {
         astroidinatorLcd.print(a_text[m_index]);
     }
-
-    printLn(a_text);
 }
 
-void writeToLcd(int a_x, int a_y, String a_text) {
+void writeToLcd(int a_x, int a_y, const String &a_text) {
     writeToLcd(a_x, a_y, a_text, false);
 }
 
-void loop() {
+void initSerial() {
+#if ENABLE_DEBUG
+    Serial.begin(SERIAL_RATE);
+    printLn("READY: Serial initialized");
+#endif
+}
 
+void showCreator() {
+    writeToLcd(0, 0, "Created by:");
+    writeToLcd(0, 1, "duncte123");
+    delay(2000);
+}
+
+void clearLcd() {
+    writeToLcd(0, 0, "", true);
+}
+
+void initPins() {
+    pinMode(JOY_KEY, INPUT_PULLUP);
+}
+
+void createObjects() {
+    for (auto &asteroid : asteroids) {
+        asteroid.type = "a";
+    }
+
+    for (auto &spaceShip : spaceShips) {
+        spaceShip.type = "s";
+    }
+}
+
+bool collsionDetected(const Player &player, const UFO &item) {
+
+    if (player.xPos == item.xPos && player.yPos == item.yPos) {
+        printLn("Collision with " + item.type);
+
+        return true;
+    }
+
+    return false;
+}
+
+void moveObjects() {
+    clearLcd();
+
+    for (auto &asteroid : asteroids) {
+        asteroid.xPos--;
+        writeToLcd(asteroid.xPos, asteroid.yPos, asteroid.type);
+
+        if (collsionDetected(player, asteroid)) {
+            //
+        }
+    }
+
+    for (auto &spaceShip : spaceShips) {
+        spaceShip.xPos--;
+        writeToLcd(spaceShip.xPos, spaceShip.yPos, spaceShip.type);
+
+        if (collsionDetected(player, spaceShip)) {
+            //
+        }
+    }
+
+    writeToLcd(player.xPos, player.yPos, player.type);
+}
+
+void updateScores() {
+    //
+}
+
+void tick() {
+    moveObjects();
+}
+
+void initTimer() {
+    timer.setInterval(250, tick);
+}
+
+void setup() {
+
+    astroidinatorLcd.init();
+    astroidinatorLcd.setBacklight(1);
+
+    initPins();
+    initSerial();
+    showCreator();
+    clearLcd();
+    createObjects();
+    moveObjects();
+    initTimer();
+}
+
+void loop() {
+//    int joy = analogRead(JOY_MOVE);
+//    int key = digitalRead(JOY_KEY);
+    timer.run();
 }
