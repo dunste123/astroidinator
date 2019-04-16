@@ -16,8 +16,8 @@
 #define JOY_MOVE A0
 #define JOY_KEY 8
 
-LiquidCrystal_I2C astroidinatorLcd(0x3F, 20, 4); // 0x27 or 0x3F
-SimpleTimer timer;
+LiquidCrystal_I2C astroidinatorLcdDSte(0x3F, 20, 4); // 0x27 or 0x3F
+SimpleTimer timerDSte;
 
 // Globals
 
@@ -25,17 +25,17 @@ typedef struct {
     int xPos = 0;
     int yPos = 1;
     String type = "}";
-} Player;
+} PlayerDSte;
 
 typedef struct {
     int xPos = random(20, 80);
     int yPos = random(0, 3);
     String type;
-} UFO;
+} UFODSte;
 
-UFO asteroids[10];
-UFO spaceShips[10];
-Player player;
+UFODSte asteroidsDSte[10];
+UFODSte spaceShipsDSte[10];
+PlayerDSte playerDSte;
 
 void printLn(const String& a_inputString) {
 #if ENABLE_DEBUG
@@ -43,60 +43,60 @@ void printLn(const String& a_inputString) {
 #endif
 }
 
-void writeToLcd(int a_x, int a_y, String a_text, bool a_clear) {
+void writeToLcdDSte(int a_x, int a_y, String a_text, bool a_clear) {
     if (a_clear) {
-        astroidinatorLcd.clear();
+        astroidinatorLcdDSte.clear();
     }
 
     if (a_x > 20 || a_y > 4 || a_x < 0 || a_y < 0) {
         return;
     }
 
-    astroidinatorLcd.setCursor(a_x, a_y);
+    astroidinatorLcdDSte.setCursor(a_x, a_y);
 
     int m_length = a_text.length();
 
     for (int m_index = 0; m_index < m_length; m_index++) {
-        astroidinatorLcd.print(a_text[m_index]);
+        astroidinatorLcdDSte.print(a_text[m_index]);
     }
 }
 
-void writeToLcd(int a_x, int a_y, const String &a_text) {
-    writeToLcd(a_x, a_y, a_text, false);
+void writeToLcdDSte(int a_x, int a_y, const String &a_text) {
+    writeToLcdDSte(a_x, a_y, a_text, false);
 }
 
-void initSerial() {
+void initSerialDSte() {
 #if ENABLE_DEBUG
     Serial.begin(SERIAL_RATE);
     printLn("READY: Serial initialized");
 #endif
 }
 
-void showCreator() {
-    writeToLcd(0, 0, "Created by:");
-    writeToLcd(0, 1, "duncte123");
+void showCreatorDSte() {
+    writeToLcdDSte(0, 0, "Created by:");
+    writeToLcdDSte(0, 1, "duncte123");
     delay(2000);
 }
 
-void clearLcd() {
-    writeToLcd(0, 0, "", true);
+void clearLcdDSte() {
+    writeToLcdDSte(0, 0, "", true);
 }
 
-void initPins() {
+void initPinsDSte() {
     pinMode(JOY_KEY, INPUT_PULLUP);
 }
 
-void createObjects() {
-    for (auto &asteroid : asteroids) {
+void createObjectsDSte() {
+    for (auto &asteroid : asteroidsDSte) {
         asteroid.type = "a";
     }
 
-    for (auto &spaceShip : spaceShips) {
+    for (auto &spaceShip : spaceShipsDSte) {
         spaceShip.type = "s";
     }
 }
 
-bool collisionDetected(const Player &player, const UFO &item) {
+bool collisionDetectedDSte(const PlayerDSte &player, const UFODSte &item) {
 
     if (player.xPos == item.xPos && player.yPos == item.yPos) {
         printLn("Collision with " + item.type);
@@ -107,79 +107,79 @@ bool collisionDetected(const Player &player, const UFO &item) {
     return false;
 }
 
-void checkController() {
-    int joy = analogRead(JOY_MOVE);
-    int mapped = map(joy, 0, 1023, 0, 255);
+void checkControllerDSte() {
+    int joyDSte = analogRead(JOY_MOVE);
+    int mappedDSte = map(joyDSte, 0, 1023, 0, 255);
 
-    if (mapped > 150) {
-        player.yPos++;
-    } else if (mapped < 100) {
-        player.yPos--;
+    if (mappedDSte > 150) {
+        playerDSte.yPos++;
+    } else if (mappedDSte < 100) {
+        playerDSte.yPos--;
     }
 
-    if (player.yPos > 3) {
-        player.yPos = 3;
+    if (playerDSte.yPos > 3) {
+        playerDSte.yPos = 3;
     }
 
-    if (player.yPos < 0) {
-        player.yPos = 0;
+    if (playerDSte.yPos < 0) {
+        playerDSte.yPos = 0;
     }
 }
 
-void moveObjects() {
-    clearLcd();
+void moveObjectsDSte() {
+    clearLcdDSte();
 
-    for (auto &asteroid : asteroids) {
+    for (auto &asteroid : asteroidsDSte) {
         asteroid.xPos--;
-        writeToLcd(asteroid.xPos, asteroid.yPos, asteroid.type);
+        writeToLcdDSte(asteroid.xPos, asteroid.yPos, asteroid.type);
 
-        if (collisionDetected(player, asteroid)) {
+        if (collisionDetectedDSte(playerDSte, asteroid)) {
             //
         }
     }
 
-    for (auto &spaceShip : spaceShips) {
+    for (auto &spaceShip : spaceShipsDSte) {
         spaceShip.xPos--;
-        writeToLcd(spaceShip.xPos, spaceShip.yPos, spaceShip.type);
+        writeToLcdDSte(spaceShip.xPos, spaceShip.yPos, spaceShip.type);
 
-        if (collisionDetected(player, spaceShip)) {
+        if (collisionDetectedDSte(playerDSte, spaceShip)) {
             //
         }
     }
 
-    writeToLcd(player.xPos, player.yPos, player.type);
+    writeToLcdDSte(playerDSte.xPos, playerDSte.yPos, playerDSte.type);
 }
 
-void updateScores() {
+void updateScoresDSte() {
     //
 }
 
-void tick() {
-    checkController();
-    moveObjects();
+void tickDSte() {
+    checkControllerDSte();
+    moveObjectsDSte();
 }
 
-void initTimer() {
-    timer.setInterval(250, tick);
+void initTimerDSte() {
+    timerDSte.setInterval(250, tickDSte);
 }
 
 void setup() {
 
-    astroidinatorLcd.init();
-    astroidinatorLcd.setBacklight(1);
+    astroidinatorLcdDSte.init();
+    astroidinatorLcdDSte.setBacklight(1);
 
-    initPins();
-    initSerial();
-    showCreator();
-    clearLcd();
-    createObjects();
-    moveObjects();
-    initTimer();
+    initPinsDSte();
+    initSerialDSte();
+    showCreatorDSte();
+    clearLcdDSte();
+    createObjectsDSte();
+    moveObjectsDSte();
+    initTimerDSte();
 }
 
 void loop() {
 //    int joy = analogRead(JOY_MOVE);
 //    int key = digitalRead(JOY_KEY);
 //    checkController();
-    timer.run();
+    timerDSte.run();
 }
