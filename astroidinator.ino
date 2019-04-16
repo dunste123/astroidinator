@@ -96,7 +96,7 @@ void createObjects() {
     }
 }
 
-bool collsionDetected(const Player &player, const UFO &item) {
+bool collisionDetected(const Player &player, const UFO &item) {
 
     if (player.xPos == item.xPos && player.yPos == item.yPos) {
         printLn("Collision with " + item.type);
@@ -107,6 +107,25 @@ bool collsionDetected(const Player &player, const UFO &item) {
     return false;
 }
 
+void checkController() {
+    int joy = analogRead(JOY_MOVE);
+    int mapped = map(joy, 0, 1023, 0, 255);
+
+    if (mapped > 150) {
+        player.yPos++;
+    } else if (mapped < 100) {
+        player.yPos--;
+    }
+
+    if (player.yPos > 3) {
+        player.yPos = 3;
+    }
+
+    if (player.yPos < 0) {
+        player.yPos = 0;
+    }
+}
+
 void moveObjects() {
     clearLcd();
 
@@ -114,7 +133,7 @@ void moveObjects() {
         asteroid.xPos--;
         writeToLcd(asteroid.xPos, asteroid.yPos, asteroid.type);
 
-        if (collsionDetected(player, asteroid)) {
+        if (collisionDetected(player, asteroid)) {
             //
         }
     }
@@ -123,7 +142,7 @@ void moveObjects() {
         spaceShip.xPos--;
         writeToLcd(spaceShip.xPos, spaceShip.yPos, spaceShip.type);
 
-        if (collsionDetected(player, spaceShip)) {
+        if (collisionDetected(player, spaceShip)) {
             //
         }
     }
@@ -136,6 +155,7 @@ void updateScores() {
 }
 
 void tick() {
+    checkController();
     moveObjects();
 }
 
@@ -160,5 +180,6 @@ void setup() {
 void loop() {
 //    int joy = analogRead(JOY_MOVE);
 //    int key = digitalRead(JOY_KEY);
+//    checkController();
     timer.run();
 }
